@@ -1,0 +1,39 @@
+rules:
+  - id: prototype-pollution-deep-merge-utils
+    message: |
+      This rule detects unsafe usage of object key merging in the 'deep-merge-utils' JavaScript library,
+      which can lead to prototype pollution vulnerabilities by allowing modification of dangerous keys like '__proto__'.
+      Prototype pollution can result in Denial of Service (DoS) or Remote Code Execution (RCE) in affected environments.
+    metadata:
+      source_title: Prototype Pollution in 'deep-merge-utils'
+      source_url: https://nvd.nist.gov/vuln/detail/CVE-2026-99887
+      references:
+        - https://nvd.nist.gov/vuln/detail/CVE-2026-99887
+      cwe:
+        - CWE-1321
+      owasp:
+        - A6:2021-Security Misconfiguration
+      confidence: high
+    languages:
+      - javascript
+      - js
+    severity: critical
+    mode: taint
+    patterns:
+      - pattern-inside: |
+          // File or module context for deep-merge-utils
+          ...
+          function merge($OBJ1, $OBJ2) {
+            ...
+          }
+      - pattern-either:
+          - pattern: |
+              $RESULT = Object.assign({}, $OBJ1, $OBJ2);
+          - pattern: |
+              for (const key in $OBJ2) {
+                pattern-not: |
+                  if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                    ...
+                  }
+                $RESULT[key] = $OBJ2[key];
+              }
