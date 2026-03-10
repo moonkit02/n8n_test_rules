@@ -1,0 +1,29 @@
+rules:
+  - id: canfail-malware-obfuscated-js-detection
+    message: \"Detects obfuscated JavaScript code potentially used by CANFAIL malware in targeted attacks.\"
+    metadata:
+      description: \"This rule identifies obfuscated JavaScript patterns indicative of malware components linked to CANFAIL attacks targeting Ukrainian organizations, as described by Google Threat Intelligence Group.\"
+      references: [\"https://thehackernews.com/2026/02/google-ties-suspected-russian-actor-to.html\"]
+      attack_vector: \"Obfuscated JavaScript malware in phishing campaigns\"
+      severity: HIGH
+    languages: [javascript]
+    severity: ERROR
+    mode: taint
+    patterns:
+      - pattern-sources:
+          - pattern-regex: \\b(eval|Function|setTimeout|setInterval)\\s*\\(([^)]*)\\)
+      - pattern-not: console.log
+  - id: canfail-malware-powershell-script-detection
+    message: \"Detects suspicious PowerShell script usage patterns associated with CANFAIL malware attack chains.\"
+    metadata:
+      description: \"This rule flags PowerShell scripts with suspicious obfuscation or execution patterns linked to CANFAIL malware targeting Ukrainian organizations as per Google Threat Intelligence Group.\"
+      references: [\"https://thehackernews.com/2026/02/google-ties-suspected-russian-actor-to.html\"]
+      attack_vector: \"PowerShell scripts in malware attack chains\"
+      severity: HIGH
+    languages: [powershell]
+    severity: ERROR
+    mode: taint
+    patterns:
+      - pattern-sources:
+          - pattern-regex: (IEX|Invoke-Expression|DownloadString|New-Object\\s+System.Net.WebClient)
+      - pattern-not: Write-Host
