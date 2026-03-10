@@ -1,0 +1,20 @@
+rules:
+  - id: jsPDF-path-traversal-arbitrary-file-read
+    message: "Path Traversal in jsPDF npm library allows arbitrary file read leading to sensitive data disclosure"
+    metadata:
+      cve: "N/A (reported bug, CVSS 9.2)"
+      severity: 9.2
+      description: "The vulnerability occurs in the loadFile() method used internally by addImage, html, and addFont, allowing user-controlled paths to read arbitrary files and disclose sensitive data."
+      affected_versions: "jsPDF < 4.0.0"
+      fixed_versions: "4.0.0 and later"
+      reference: "https://thehackernews.com/2026/01/critical-adonisjs-bodyparser-flaw-cvss.html"
+    pattern: |
+      function loadFile(path) {
+        ...
+        readFileSync(path)
+        ...
+      }
+    mode: taint
+    severity: ERROR
+    languages: [javascript, typescript]
+    tags: [security, path-traversal, arbitrary-file-read, sensitive-data-disclosure]
