@@ -1,0 +1,38 @@
+rules:
+  - id: adonisjs-bodyparser-arbitrary-file-write
+    message: "Critical AdonisJS Bodyparser Path Traversal Leading to Arbitrary File Write (CVE-2026-21440)"
+    metadata:
+      cve: CVE-2026-21440
+      severity: CRITICAL
+      description: "Detects usage of MultipartFile.move() in @adonisjs/bodyparser without passing sanitizing options, leading to path traversal and arbitrary file write vulnerability."
+      reference: https://www.exploit-db.com/exploits/52427
+    languages: [typescript, javascript]
+    severity: ERROR
+    patterns:
+      - pattern: |
+          MultipartFile.move($DST)
+      - pattern-not: |
+          MultipartFile.move($DST, $OPTIONS)
+      - message: "Potential insecure use of MultipartFile.move() without options allowing path traversal and arbitrary file write."
+
+  - id: adonisjs-bodyparser-unsafe-filename-overwrite
+    message: "AdonisJS Bodyparser MultipartFile.move() Unsafe Filename Overwrite Leading to Potential RCE (CVE-2026-21440)"
+    metadata:
+      cve: CVE-2026-21440
+      severity: CRITICAL
+      description: "Detects MultipartFile.move() called without filename sanitization or overwrite flag control, allowing attackers to overwrite files and possibly achieve remote code execution depending on environment."
+      reference: https://www.exploit-db.com/exploits/52427
+    languages: [typescript, javascript]
+    severity: ERROR
+    patterns:
+      - pattern: |
+          MultipartFile.move($DST, { name: $NAME, overwrite: true })
+      - pattern-either:
+          - pattern-either:
+              - pattern-regex: $NAME
+                regex: ".*\\.\\./.*"
+              - pattern-regex: $NAME
+                regex: ".*\\..\\..\\.*"
+          - pattern-not-regex: $NAME
+            regex: ".*\\/.*"
+      - message: "Possible path traversal in filename with overwrite flag set, risk of arbitrary file overwrite and RCE."
