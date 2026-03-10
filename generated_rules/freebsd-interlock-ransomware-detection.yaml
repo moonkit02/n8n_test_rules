@@ -1,0 +1,34 @@
+rules:
+  - id: freebsd-interlock-ransomware-detection
+    message: \"Detects Interlock ransomware behaviors on FreeBSD servers by monitoring suspicious encryption and file manipulation patterns specific to Interlock.\"
+    metadata:
+      title: \"Meet Interlock, the New Ransomware Targeting FreeBSD Servers\"
+      description: \"Targets Interlock ransomware indicators such as rapid file encryption, specific FreeBSD file paths, and suspicious process names.\"
+      source: https://www.bleepingcomputer.com/news/security/meet-interlock-the-new-ransomware-targeting-freebsd-servers/
+    languages: [generic]
+    severity: MEDIUM
+    patterns:
+      - pattern-inside: |
+          function encrypt_files() {
+            .....
+            $ENCRYPTION_CALL = encrypt($FILE)
+            .....
+          }
+      - pattern-not-inside: |
+          function benign_process() {
+            .....
+          }
+      - pattern-either:
+          - pattern: |-
+              $PROC == \"interlock\"
+          - pattern: |-
+              path == \"/usr/local/etc/interlock/\"
+          - pattern: |-
+              encrypt($FILE)
+
+      - metavariable-pattern:
+          metavariable: $FILE
+          pattern: ".*\\.(txt|doc|pdf|conf)"
+
+      - condition: |
+          $ENCRYPTION_CALL and $FILE and ($PROC == \"interlock\" or path == \"/usr/local/etc/interlock/\")
