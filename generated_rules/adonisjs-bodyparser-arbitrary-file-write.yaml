@@ -1,0 +1,26 @@
+rules:
+  - id: adonisjs-bodyparser-arbitrary-file-write
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              function parseMultipartHandler($REQ, ...) {
+                $VAR = $OBJ.parseMultipart($REQ)
+                ...
+              }
+          - pattern-inside: |
+              ({ $REQ }, $RES) => {
+                $VAR = $OBJ.parseMultipart($REQ, ...)
+                ...
+              }
+      - focus-metavariable: $REQ
+    message: "Critical AdonisJS Bodyparser Flaw (CVE-2026-21440) enables arbitrary file write via path traversal in multipart file handling. This vulnerability allows remote attackers to write arbitrary files on the server by exploiting path traversal in the @adonisjs/bodyparser npm package."
+    metadata:
+      cve: CVE-2026-21440
+      severity: 9.2
+      description: "Path traversal vulnerability in AdonisJS multipart file handling allowing remote arbitrary file write on servers. Affected package: @adonisjs/bodyparser."
+    languages: [javascript, typescript]
+    severity: ERROR
+    rule_type: vulnerability
+    tags: [security, path-traversal, arbitrary-file-write, cve-2026-21440]
+    fix: |
+      Update @adonisjs/bodyparser to the latest patched version.
