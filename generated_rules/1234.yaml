@@ -1,0 +1,23 @@
+rules:
+  - id: adonisjs-bodyparser-path-traversal-arbitrary-file-write
+    message: \"Critical AdonisJS Bodyparser Path Traversal Vulnerability (CVE-2026-21440) allowing arbitrary file write via crafted filename.\"
+    metadata:
+      cve: CVE-2026-21440
+      description: \"This rule detects potential path traversal issues in the AdonisJS @adonisjs/bodyparser multipart file handling method that could allow a remote attacker to write arbitrary files on the server. Exploitation requires crafted filenames triggering improper path sanitization in the moveToPath function or equivalent.\"
+      severity: High
+      cvss: 9.2
+      url: https://www.exploit-db.com/exploits/52461
+    languages: [javascript, typescript]
+    severity: ERROR
+    mode: taint
+    patterns:
+      - pattern-either:
+          - pattern: file.moveToPath($PATH)
+          - pattern: file.move($PATH)
+    sources:
+      - pattern: request.body
+      - pattern: request.files
+    sinks:
+      - pattern: file.moveToPath($PATH)
+      - pattern: file.move($PATH)
+    
