@@ -1,0 +1,39 @@
+rules:
+  - id: ssh-bruteforce-detection
+    message: 'Potential SSH brute force attack pattern detected targeting FreeBSD servers as described in Interlock ransomware.'
+    metadata:
+      description: 'Detects possible SSH brute force login attempts which are a common attack vector for Interlock ransomware.'
+      source: 'https://www.bleepingcomputer.com/news/security/meet-interlock-the-new-ransomware-targeting-freebsd-servers/'
+    languages: [bash, shell]
+    severity: WARNING
+    patterns:
+      - pattern-inside: |
+          while true; do
+            ssh $USER@$HOST
+          done
+      - pattern-regex: 'Failed password for [a-zA-Z0-9._%-]+ from [0-9.]+ port [0-9]+ ssh2'
+  - id: suspicious-file-encryption
+    message: 'Suspicious file encryption operation detected, possibly related to ransomware behavior.'
+    metadata:
+      description: 'Detects usage of AES encryption calls on server files, indicative of ransomware encrypting files.'
+      source: 'https://www.bleepingcomputer.com/news/security/meet-interlock-the-new-ransomware-targeting-freebsd-servers/'
+    languages: [c, c++, go, rust, python]
+    severity: ERROR
+    patterns:
+      - pattern: 'AES_encrypt($DATA, $KEY)'
+      - pattern-either:
+          - pattern: 'encrypt($FILE, $KEY)'
+          - pattern: 'crypto_encrypt($FILE, $KEY)'
+  - id: backup-deletion-ransomware
+    message: 'Ransomware behavior: deletion of backup files detected.'
+    metadata:
+      description: 'Detects commands or code patterns that delete backup directories or files which ransomware uses to prevent recovery.'
+      source: 'https://www.bleepingcomputer.com/news/security/meet-interlock-the-new-ransomware-targeting-freebsd-servers/'
+    languages: [bash, shell, python]
+    severity: ERROR
+    patterns:
+      - pattern-regex: 'rm -rf /backup(/|$)'
+      - pattern-regex: 'rm -rf [^\s]*\.bak'
+      - pattern-not:
+          pattern-regex: 'echo rm -rf'
+      - pattern: 'shred $FILE'
