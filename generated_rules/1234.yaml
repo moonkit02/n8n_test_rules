@@ -1,0 +1,76 @@
+rules:
+  - id: cve-2023-XXXX-router-vulnerability
+    message: \"Exploitation of CVE-2023-XXXX in network routers allowing unauthorized access.\"
+    metadata:
+      cve: \"CVE-2023-XXXX\"
+      description: \"Chinese state-sponsored APT actors exploit this CVE in routers to gain unauthorized access as detailed in the CISA advisory.\"
+      reference: \"https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-203a\"
+      affected_products: \"Routers\"
+      threat_actor: \"Chinese state-sponsored APT\"
+    languages: [generic]
+    severity: ERROR
+    patterns:
+      - pattern-inside: |
+          def $FUNC(...):
+            ...
+            exec some_vulnerable_router_command()
+
+  - id: cve-2023-YYYY-firewall-auth-bypass
+    message: \"Authentication bypass via CVE-2023-YYYY in firewall devices exploited by Chinese APT.\"
+    metadata:
+      cve: \"CVE-2023-YYYY\"
+      description: \"Chinese state-sponsored actors leverage this CVE to bypass firewall authentication mechanisms.\"
+      reference: \"https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-203a\"
+      affected_products: \"Firewalls\"
+      threat_actor: \"Chinese state-sponsored APT\"
+    languages: [generic]
+    severity: ERROR
+    patterns:
+      - pattern-inside: |
+          if $CONDITION:
+            bypass_authentication()
+
+  - id: cve-2023-ZZZZ-vpn-credential-leak
+    message: \"Credential leak vulnerability CVE-2023-ZZZZ in VPN devices exploited by APT actors.\"
+    metadata:
+      cve: \"CVE-2023-ZZZZ\"
+      description: \"APT actors exploit this CVE to leak credentials from VPN devices allowing persistent access.\"
+      reference: \"https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-203a\"
+      affected_products: \"VPNs\"
+      threat_actor: \"Chinese state-sponsored APT\"
+    languages: [generic]
+    severity: ERROR
+    patterns:
+      - pattern-inside: |
+          def $FUNC(...):
+            ...
+            leak_credentials()
+
+  - id: weak-credential-usage
+    message: \"Detection of weak credential usage that can lead to unauthorized access in network devices.\"
+    metadata:
+      description: \"Chinese state-sponsored APTs exploit weak credentials to maintain unauthorized access in various network devices.\"
+      reference: \"https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-203a\"
+      threat_actor: \"Chinese state-sponsored APT\"
+    languages: [generic]
+    severity: WARNING
+    patterns:
+      - pattern-either:
+          - pattern: \"password = \\\"admin\\\"\"
+          - pattern: \"password = \\\"1234\\\"\"
+          - pattern: \"password = \\\"password\\\"\"
+    condition: any
+
+  - id: network-device-misconfiguration
+    message: \"Misconfiguration patterns in network devices leading to potential unauthorized access.\"
+    metadata:
+      description: \"Misconfigurations exploited by Chinese APT actors as per the advisory.\"
+      reference: \"https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-203a\"
+      threat_actor: \"Chinese state-sponsored APT\"
+    languages: [generic]
+    severity: WARNING
+    patterns:
+      - pattern-inside: \"interface_config $SETTING\"
+      - pattern-not-inside: \"interface_config correct_setting\"
+      - pattern: \"firewall_rule_allow_any\"
+    condition: (pattern-inside and pattern-not-inside) or pattern
