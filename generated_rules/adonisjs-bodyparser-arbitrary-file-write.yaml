@@ -1,0 +1,15 @@
+rules:
+  - id: adonisjs-bodyparser-arbitrary-file-write
+    patterns:
+      - pattern: MultipartFile.move(..., $OPTIONS)
+      - pattern-not-inside: $OPTIONS.sanitizeFilename(...)
+      - pattern-either:
+          - pattern: $FILE_NAME
+          - pattern: filename
+      - pattern-not-inside: MultipartFile.move(..., { sanitizeFilename: true })
+    message: "Critical AdonisJS Bodyparser flaw (CVE-2026-21440): Unsanitized filename in MultipartFile.move() can lead to arbitrary file write via path traversal. Ensure filename is sanitized using sanitizeFilename option or similar."
+    metadata:
+      cve: CVE-2026-21440
+      severity: 9.2
+      package: \"@adonisjs/bodyparser\"
+      description: "If MultipartFile.move() is called without the options argument or without sanitizing the filename, an attacker can exploit path traversal to write arbitrary files on the server, potentially leading to remote code execution if critical files are overwritten."
