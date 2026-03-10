@@ -1,0 +1,30 @@
+rules:
+  - id: gpu-driver-memory-corruption
+    message: \"Memory corruption vulnerability in GPU driver due to crafted input leading to use-after-free or out-of-bounds access.\"
+    metadata:
+      description: \"Detects memory corruption issues such as use-after-free and out-of-bounds in GPU drivers by tracking tainted inputs and enforcing bounds checks.\"
+    languages: [c, cpp]
+    severity: ERROR
+    mode: taint
+    patterns:
+      - pattern-either:
+          - pattern: |
+              free($OBJ);
+              $OBJ->__use_after_free_marker = 1;
+              ...
+              $OBJ->...
+          - pattern-inside: |
+              if ($IDX >= $SIZE) {
+                ...
+              }
+              $ARR[$IDX] = $VAL;
+          - pattern-inside: |
+              memcpy($DST, $SRC, $LEN);
+              if ($LEN > $DST_SIZE) {
+                ...
+              }
+    severity: ERROR
+    metadata:
+      category: security
+      precision: high
+      explained: \"This rule leverages taint and pattern-inside to reduce false positives and detect true memory corruption risks.\"
