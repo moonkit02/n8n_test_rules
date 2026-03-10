@@ -1,0 +1,43 @@
+rules:
+  - id: cve-2026-21440-path-traversal-in-multipartfile-move
+    message: \"CVE-2026-21440: Path traversal vulnerability in MultipartFile.move() in @adonisjs/bodyparser allowing arbitrary file write via unsanitized filename parameter leading to potential RCE.\"
+    metadata:
+      cve: CVE-2026-21440
+      description: \"The MultipartFile.move() function in @adonisjs/bodyparser does not sanitize the filename parameter, enabling attackers to perform path traversal and write arbitrary files, risking remote code execution.\"
+      package: \"@adonisjs/bodyparser\"
+      severity: CRITICAL
+      references:
+        - https://thehackernews.com/2026/02/crescentharvest-campaign-targets-iran.html
+    languages: [javascript, typescript]
+    severity: CRITICAL
+    mode: taint
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $FILE.move($FILENAME)
+          - pattern: |
+              MultipartFile.move($FILENAME)
+      - pattern-not:
+          - pattern: sanitize($FILENAME)
+          - pattern: clean($FILENAME)
+          - pattern: validate($FILENAME)
+          - pattern: isSafe($FILENAME)
+  
+  - id: jsPDF-path-traversal-vulnerability
+    message: \"Path traversal vulnerability in jsPDF library allowing attackers to manipulate file paths leading to security risks.\"
+    metadata:
+      description: \"The jsPDF library contains a path traversal vulnerability that attackers can exploit to manipulate file paths.\"
+      severity: HIGH
+      references:
+        - https://thehackernews.com/2026/02/crescentharvest-campaign-targets-iran.html
+    languages: [javascript, typescript]
+    severity: HIGH
+    mode: taint
+    patterns:
+      - pattern: |
+          new jsPDF({ $OPTIONS })
+      - pattern-not: 
+          - pattern: sanitize($OPTIONS)
+          - pattern: clean($OPTIONS)
+          - pattern: validate($OPTIONS)
+          - pattern: isSafe($OPTIONS)
