@@ -1,0 +1,31 @@
+rules:
+- id: stack-buffer-overflow-in-bmp-reader-bi-clrused
+  languages: [c]
+  severity: WARNING
+  message: "Potential stack buffer overflow due to unchecked fread size from BMP header field biClrUsed. Validate biClrUsed before using it as size in fread to avoid overflow."
+  metadata:
+    cwe:
+      - 'CWE-121: Stack-based Buffer Overflow'
+    owasp:
+      - 'A5:2021 - Security Misconfiguration'
+    category: security
+    technology:
+      - c
+    references:
+      - https://www.exploit-db.com/exploits/52425
+  mode: taint
+  pattern-sources:
+    - pattern: fread(&temp_biClrUsed, sizeof(int32_t), 1, ...)
+  pattern-sinks:
+    - pattern: fread(buffer, 1, $SIZE, ...)
+      where:
+        - $SIZE == biClrUsed
+  pattern-sanitizers:
+    - pattern: |
+        if ($SIZE < 0 || $SIZE > 1024) {
+          ...
+        }
+    - pattern: |
+        if (temp_biClrUsed < 0 || temp_biClrUsed > 1024) {
+          ...
+        }
