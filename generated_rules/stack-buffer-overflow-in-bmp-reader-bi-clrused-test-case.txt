@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+
+int image_load_bmp_vulnerable(FILE *fp) {
+    uint32_t biClrUsed;
+    unsigned char buffer[1024];
+
+    // Read biClrUsed from BMP header (simulate reading signed int)
+    int32_t temp_biClrUsed;
+    fread(&temp_biClrUsed, sizeof(int32_t), 1, fp);
+    biClrUsed = (size_t)temp_biClrUsed;
+
+    // ruleid:stack-buffer-overflow-in-bmp-reader-bi-clrused
+    fread(buffer, 1, biClrUsed, fp); // No validation, can overflow buffer
+
+    return 0;
+}
+
+int image_load_bmp_safe(FILE *fp) {
+    uint32_t biClrUsed;
+    unsigned char buffer[1024];
+
+    int32_t temp_biClrUsed;
+    fread(&temp_biClrUsed, sizeof(int32_t), 1, fp);
+
+    if (temp_biClrUsed < 0 || temp_biClrUsed > 1024) {
+        // ok:stack-buffer-overflow-in-bmp-reader-bi-clrused
+        return -1; // Reject invalid or too large biClrUsed
+    }
+
+    biClrUsed = (size_t)temp_biClrUsed;
+
+    // ok:stack-buffer-overflow-in-bmp-reader-bi-clrused
+    fread(buffer, 1, biClrUsed, fp); // Safe copy with validation
+
+    return 0;
+}
