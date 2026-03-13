@@ -1,0 +1,48 @@
+id: unauthenticated-docker-engine-api-access
+languages: [javascript]
+severity: ERROR
+message: >-
+  Docker Engine API is accessed unauthenticated on default TCP port 2375 allowing
+  unauthorized container creation with host filesystem bind mounts, leading to
+  potential host compromise.
+metadata:
+  cwe:
+    - 'CWE-862: Missing Authorization'
+  owasp:
+    - 'A01:2025 - Broken Access Control'
+  category: security
+  technology:
+    - nodejs
+  references:
+    - https://www.exploit-db.com/exploits/52472
+mode: taint
+pattern-sources:
+  - pattern: |
+      const options = {
+        hostname: 'localhost',
+        port: 2375,
+        ...
+      };
+pattern-sinks:
+  - pattern: |
+      const postData = JSON.stringify({
+        Image: $IMAGE,
+        HostConfig: {
+          Binds: $BINDS
+        }
+      });
+pattern-sanitizers:
+  - pattern: |
+      const options = {
+        hostname: 'localhost',
+        port: 2376,
+        ...
+        rejectUnauthorized: true
+      };
+  - pattern: |
+      const postData = JSON.stringify({
+        Image: $IMAGE,
+        HostConfig: {
+          Binds: $SAFE_BINDS
+        }
+      });
