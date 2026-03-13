@@ -1,0 +1,11 @@
+import os
+import shlex
+
+def execute_system_event_handler(filename):
+    # ruleid: arbitrary-command-execution-via-unsanitized-filename
+    os.system(f"echo Processing file: {filename} && some_command {filename}")
+
+def execute_system_event_handler_safe(filename):
+    # ok: arbitrary-command-execution-via-unsanitized-filename
+    safe_filename = shlex.quote(filename)
+    os.system(f"echo Processing file: {safe_filename} && some_command {safe_filename}")
