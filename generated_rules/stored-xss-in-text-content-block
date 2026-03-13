@@ -1,0 +1,23 @@
+rules:
+- id: stored-xss-in-text-content-block
+  languages:
+  - csharp
+  severity: ERROR
+  message: "Stored XSS vulnerability: returning raw text from Text property without HTML encoding allows stored XSS. Use HtmlEncode to sanitize output."
+  metadata:
+    cwe:
+    - "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+    owasp:
+    - "A07:2017 - Cross-Site Scripting (XSS)"
+    category: security
+    technology:
+    - .net
+    references:
+    - https://www.exploit-db.com/exploits/52471
+  mode: taint
+  pattern-sources:
+  - pattern: $X.Text
+  pattern-sinks:
+  - pattern: return $X
+  pattern-sanitizers:
+  - pattern: return System.Net.WebUtility.HtmlEncode($X)
