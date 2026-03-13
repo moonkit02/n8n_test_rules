@@ -1,0 +1,72 @@
+const http = require('http');
+
+function createMaliciousContainer() {
+    const options = {
+        hostname: 'localhost',
+        port: 2375,
+        path: '/containers/create',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
+
+    const postData = JSON.stringify({
+        Image: 'alpine',
+        HostConfig: {
+            // ruleid: unauthenticated-docker-engine-api-access
+            Binds: ['/host/root:/mnt/root']
+        }
+    });
+
+    const req = http.request(options, (res) => {
+        res.on('data', (chunk) => {
+            console.log(`BODY: ${chunk}`);
+        });
+    });
+
+    req.on('error', (e) => {
+        console.error(`problem with request: ${e.message}`);
+    });
+
+    req.write(postData);
+    req.end();
+}
+
+function createSafeContainer() {
+    const options = {
+        hostname: 'localhost',
+        port: 2376, // ok: unauthenticated-docker-engine-api-access
+        path: '/containers/create',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        // ok: unauthenticated-docker-engine-api-access
+        rejectUnauthorized: true
+    };
+
+    const postData = JSON.stringify({
+        Image: 'alpine',
+        HostConfig: {
+            // ok: unauthenticated-docker-engine-api-access
+            Binds: ['/container/data:/data']
+        }
+    });
+
+    const req = http.request(options, (res) => {
+        res.on('data', (chunk) => {
+            console.log(`BODY: ${chunk}`);
+        });
+    });
+
+    req.on('error', (e) => {
+        console.error(`problem with request: ${e.message}`);
+    });
+
+    req.write(postData);
+    req.end();
+}
+
+createMaliciousContainer();
+createSafeContainer();
