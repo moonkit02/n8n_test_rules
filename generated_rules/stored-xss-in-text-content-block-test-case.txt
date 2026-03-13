@@ -1,0 +1,16 @@
+public class TextContentBlock
+{
+    public string Text { get; set; }
+
+    // ruleid: stored-xss-in-text-content-block
+    public string RenderUnsafe()
+    {
+        return Text; // Unsafe: returns raw text allowing stored XSS
+    }
+
+    // ok: stored-xss-in-text-content-block
+    public string RenderSafe()
+    {
+        return System.Net.WebUtility.HtmlEncode(Text); // Safe: encodes text to prevent XSS
+    }
+}
