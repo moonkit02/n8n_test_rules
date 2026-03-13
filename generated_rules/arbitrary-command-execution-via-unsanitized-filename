@@ -1,0 +1,27 @@
+rules:
+  - id: arbitrary-command-execution-via-unsanitized-filename
+    languages:
+      - python
+    severity: ERROR
+    message: "Unsanitized filename used in os.system call leading to arbitrary command execution."
+    metadata:
+      cwe: "CWE-78"
+      owasp: "A1:2021"
+      category: security
+      technology: python
+      url: https://www.exploit-db.com/exploits/52476
+    mode: taint
+    pattern-sources:
+      - pattern: |
+          def $FUNC($FILENAME):
+            ...
+            os.system($CMD)
+    pattern-sinks:
+      - pattern: os.system($CMD)
+    pattern-sanitizers:
+      - pattern: |
+          import shlex
+          def $FUNC($FILENAME):
+            ...
+            $SAFE_FILENAME = shlex.quote($FILENAME)
+            os.system($CMD)
